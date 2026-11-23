@@ -17,8 +17,18 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Unzip Game
-        run: unzip -o iron-fang-android-github.zip -x ".github/*"
+      - name: Unzip & Prepare Project
+        run: |
+          for z in *.zip; do
+            [ -f "$z" ] && unzip -o "$z" -x ".github/*"
+          done
+          if [ ! -f package.json ]; then
+            mkdir -p www
+            [ -d iron-fang-fighter ] && cp -r iron-fang-fighter/* www/
+            [ -f iron-fang-arcade.html ] && cp iron-fang-arcade.html www/index.html
+            printf '{"name":"iron-fang-arcade","version":"1.0.0","private":true,"dependencies":{"@capacitor/android":"^6.1.0","@capacitor/core":"^6.1.0"},"devDependencies":{"@capacitor/cli":"^6.1.0"}}\n' > package.json
+            printf '{"appId":"com.ironfang.arcade","appName":"Iron Fang","webDir":"www","android":{"backgroundColor":"#090b14"}}\n' > capacitor.config.json
+          fi
       - name: Build Android APK
         run: |
           npm install
